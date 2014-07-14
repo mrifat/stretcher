@@ -110,7 +110,7 @@ describe Stretcher::Server do
     end
 
     context "server lives in a subdirectory" do
-      subject { Stretcher::Server.new("http://example.com/mysubdir/").path_uri("/foo") }      
+      subject { Stretcher::Server.new("http://example.com/mysubdir/").path_uri("/foo") }
       it { should eq ("http://example.com/mysubdir/foo") }
     end
   end
@@ -145,7 +145,7 @@ describe Stretcher::Server do
 
     it "should return a hash of the aliases if at least one exists" do
       server.aliases(:actions => [{ :add => { :index => "foo", :alias => "bar" }}])
-      expect(server.get_alias("bar")).to eq({"foo" => {"aliases" => {"bar" => {}}}})
+      expect(server.get_alias("bar")).to eql({"foo" => {"aliases" => {"bar" => {}}}})
     end
   end
 

@@ -6,9 +6,9 @@ module Stretcher
     # Returns a properly configured HTTP client when initializing an instance
     def self.build_client(uri_components, options={})
       http = Faraday.new(:url => uri_components) do |builder|
-        builder.response :multi_json, :content_type => /\bjson$/
+        builder.response :json, :content_type => /\bjson$/
 
-        builder.request :multi_json
+        builder.request :json
 
         builder.options[:timeout] = options[:read_timeout] || 30
         builder.options[:open_timeout] = options[:open_timeout] || 2
@@ -45,7 +45,7 @@ module Stretcher
           "[Stretcher][#{severity}]: #{msg}\n"
         end
       end
-      
+
       logger
     end
 
@@ -80,7 +80,7 @@ module Stretcher
     # using a threadsafe HTTP library such as faraday, the mutex synchronization around
     # API calls to the server can be avoided. In this case, set the option http_threadsafe: true
     # 
-    def initialize(uri='http://localhost:9200', options={})      
+    def initialize(uri='http://localhost:9200', options={})
       @http_threadsafe = !!options[:http_threadsafe]
       @request_mtx = Mutex.new unless @http_threadsafe
       @uri = uri.to_s
@@ -142,7 +142,7 @@ module Stretcher
     #    server.msearch(data)
     def msearch(body=[])
       raise ArgumentError, "msearch takes an array!" unless body.is_a?(Array)
-      fmt_body = body.map {|l| MultiJson.dump(l) }.join("\n") << "\n"
+      fmt_body = body.map {|l| JSON.dump(l) }.join("\n") << "\n"
 
       res = request(:get, path_uri("/_msearch"), {}, fmt_body, {}, :mashify => false)
 
@@ -162,9 +162,9 @@ module Stretcher
     def mget(docs=[], arg_opts={})
       #Legacy API
       return legacy_mget(docs) if docs.is_a?(Hash)
-      
+
       opts = {:exists => true}.merge(arg_opts)
-      
+
       res = request(:get, path_uri("/_mget"), {}, {:docs => docs})[:docs]
       if opts.has_key?(:exists)
         match = opts[:exists]
@@ -173,7 +173,7 @@ module Stretcher
         res
       end
     end
-    
+
     # legacy implementation of mget for backwards compat
     def legacy_mget(body)
       request(:get, path_uri("/_mget"), {}, body)

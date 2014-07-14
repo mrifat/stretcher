@@ -51,7 +51,7 @@ module Stretcher
 
     def bulk_action(action, documents, options={})
       action=action.to_sym
-      
+
       body = documents.reduce("") {|post_data, d_raw|
         d = Hashie::Mash.new(d_raw)
         index_meta = { :_id => (d[:id] || d.delete(:_id)) }
@@ -61,8 +61,8 @@ module Stretcher
           index_meta[key] = d.delete(key) if system_fields.include?(key.to_s)
         end
 
-        post_data << (MultiJson.dump({action => index_meta}) << "\n")
-        post_data << (MultiJson.dump(d) << "\n") unless action == :delete
+        post_data << (JSON.dump({action => index_meta}) << "\n")
+        post_data << (JSON.dump(d) << "\n") unless action == :delete
         post_data
       }
       bulk body, options
